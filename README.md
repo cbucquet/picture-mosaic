@@ -1,1 +1,2 @@
-# picture-mosaic
+# Picture Mosaic
+Initial commit
