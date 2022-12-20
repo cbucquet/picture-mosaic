@@ -1,13 +1,24 @@
 from PIL import Image
 import sys
+from os import listdir
+from os.path import isfile, join, splitext
 import time
 
 # CONSTANTS
-PIXELATED_SIZE = 15 # number of pixels in conterted image (lowest of height/width)
-TEMPLATE_SIDE = 100
+PIXELATED_SIZE = 200 # number of pixels in conterted image (lowest of height/width)
+TEMPLATE_SIDE = 20
+VALID_IMAGE_EXTENSIONS = [".jpeg", ".jpg", ".png"]
 
-def transformTemplate(imagePath, templateSide):
+def collectTemplateFileName(folderPath):
+    names = []
+    for name in listdir(folderPath):
+        if isfile(join(folderPath, name)) and splitext(name)[1] in VALID_IMAGE_EXTENSIONS:
+            names.append(join(folderPath, name))
+    return names
+
+def transformTemplate(imagePath):
     img = Image.open(imagePath)
+    img = img.convert('RGB')
     width, height = img.size
 
     # Find cropped square image boundaries (centered in image)
@@ -26,23 +37,27 @@ def transformTemplate(imagePath, templateSide):
 
 def findMainColor(img):
     # Find main pixel color in image
-    run_r, run_g, run_b = 0,0,0
-    pixel_count = 0
+    # run_r, run_g, run_b = 0,0,0
+    # pixel_count = 0
 
-    height, width = img.size
-    for i in range(height):
-        for j in range(width):
-            r, g, b = img.getpixel((i, j))
-            run_r += r
-            run_g += g
-            run_b += b
-            pixel_count += 1
+    # height, width = img.size
+    # for i in range(height):
+    #     for j in range(width):
+    #         r, g, b = img.getpixel((i, j))
+    #         run_r += r
+    #         run_g += g
+    #         run_b += b
+    #         pixel_count += 1
 
-    avg_r = run_r // pixel_count
-    avg_g = run_g // pixel_count
-    avg_b = run_b // pixel_count
+    # avg_r = run_r // pixel_count
+    # avg_g = run_g // pixel_count
+    # avg_b = run_b // pixel_count
 
-    return avg_r, avg_b, avg_g
+    # return avg_r, avg_g, avg_b
+
+
+    imgScale = img.resize((1,1), resample=Image.Resampling.BILINEAR)
+    return imgScale.getpixel((0,0))
 
 
 def findClosestValue(pixel, values):
@@ -66,14 +81,16 @@ def main():
         sys.exit(1)
     
     imagePath = sys.argv[1]
-    templatesPath = ["1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg"]
+    templatesPath = collectTemplateFileName("/Users/Charles/Downloads/images")
+
+    print("Importing picture to mosaicfy...")
 
     # Open image in pillow
     img = Image.open(imagePath)
     img = img.convert('RGB')
     width, height = img.size
     # print(width, height)
-    # img.show()
+    img.show()
     
     # Pixelate image
     IMAGE_WIDTH = PIXELATED_SIZE * height // width
@@ -84,23 +101,23 @@ def main():
 
     imgPixelated = img.resize((IMAGE_HEIGHT,IMAGE_WIDTH), resample=Image.Resampling.BILINEAR)
     imgPixelatedShow = imgPixelated.resize(img.size, Image.Resampling.NEAREST) # scale it back (for showing)
-    # imgPixelatedShow.show()
+    imgPixelatedShow.show()
+
+    print("Done!")
+    print("Making templates from pictures...")
 
     # Generate templates
     templates = []
     for path in templatesPath:
-        templates.append(transformTemplate(path, TEMPLATE_SIDE))
+        templates.append(transformTemplate(path))
 
     # Get average pixel value for each template
     averages = []
     for template in templates:
         averages.append(findMainColor(template))
 
-    for i in range(len(templates)):
-        templates[i].show()
-        print(averages[i])
-        time.sleep(5)
-
+    print("Done!")
+    print("Making final pictures from template...")
 
     # Collate final image based on closest pixel value
     FINAL_IMAGE_WIDTH = IMAGE_WIDTH * TEMPLATE_SIDE
@@ -111,6 +128,9 @@ def main():
             index = findClosestValue(imgPixelated.getpixel((i,j)), averages)
 
             new_image.paste(templates[index],(i*TEMPLATE_SIDE,j*TEMPLATE_SIDE))
+
+    print("Done!")
+    print("Now showing image")
     new_image.show()
 
 if __name__ == "__main__":
