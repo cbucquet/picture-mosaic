@@ -1,13 +1,14 @@
-from PIL import Image
+from PIL import Image, ImageOps
 import sys
 from os import listdir
-from os.path import isfile, join, splitext
+from os.path import isfile, join, splitext, basename
 import time
 
 # CONSTANTS
-PIXELATED_SIZE = 200 # number of pixels in conterted image (lowest of height/width)
+PIXELATED_SIZE = 300 # number of pixels in conterted image (lowest of height/width)
 TEMPLATE_SIDE = 20
 VALID_IMAGE_EXTENSIONS = [".jpeg", ".jpg", ".png"]
+BLACK_AND_WHITE = True
 
 def collectTemplateFileName(folderPath):
     names = []
@@ -18,7 +19,8 @@ def collectTemplateFileName(folderPath):
 
 def transformTemplate(imagePath):
     img = Image.open(imagePath)
-    img = img.convert('RGB')
+    img = ImageOps.exif_transpose(img)
+    img = img.convert('L') if BLACK_AND_WHITE else img.convert('RGB')
     width, height = img.size
 
     # Find cropped square image boundaries (centered in image)
@@ -64,11 +66,21 @@ def findClosestValue(pixel, values):
     minIndex = -1
     minIndicator = 255*255 * 3 + 1 # greater than all pixels
 
-    r, g, b = pixel
+    r, g, b, v = 0, 0, 0, 0
+    if BLACK_AND_WHITE:
+        v = pixel
+    else:
+        r, g, b = pixel
+
 
     for i in range(len(values)):
-        comp_r, comp_g, comp_b = values[i]
-        indicator = (comp_r - r)**2 + (comp_g - g)**2 + (comp_b - b)**2
+        if BLACK_AND_WHITE:
+            comp_v = values[i]
+            indicator = abs(comp_v - v)
+        else:
+            comp_r, comp_g, comp_b = values[i]
+            indicator = (comp_r - r)**2 + (comp_g - g)**2 + (comp_b - b)**2
+
         if indicator < minIndicator:
             minIndicator = indicator
             minIndex = i
@@ -87,10 +99,11 @@ def main():
 
     # Open image in pillow
     img = Image.open(imagePath)
-    img = img.convert('RGB')
+    img = ImageOps.exif_transpose(img)
+    img = img.convert('L') if BLACK_AND_WHITE else img.convert('RGB')
     width, height = img.size
     # print(width, height)
-    img.show()
+    # img.show()
     
     # Pixelate image
     IMAGE_WIDTH = PIXELATED_SIZE * height // width
@@ -101,7 +114,7 @@ def main():
 
     imgPixelated = img.resize((IMAGE_HEIGHT,IMAGE_WIDTH), resample=Image.Resampling.BILINEAR)
     imgPixelatedShow = imgPixelated.resize(img.size, Image.Resampling.NEAREST) # scale it back (for showing)
-    imgPixelatedShow.show()
+    # imgPixelatedShow.show()
 
     print("Done!")
     print("Making templates from pictures...")
@@ -111,13 +124,15 @@ def main():
     for path in templatesPath:
         templates.append(transformTemplate(path))
 
+    print("Imported all templates!")
+
     # Get average pixel value for each template
     averages = []
     for template in templates:
         averages.append(findMainColor(template))
 
     print("Done!")
-    print("Making final pictures from template...")
+    print("Making final pictures from templates...")
 
     # Collate final image based on closest pixel value
     FINAL_IMAGE_WIDTH = IMAGE_WIDTH * TEMPLATE_SIDE
@@ -130,8 +145,9 @@ def main():
             new_image.paste(templates[index],(i*TEMPLATE_SIDE,j*TEMPLATE_SIDE))
 
     print("Done!")
-    print("Now showing image")
-    new_image.show()
+    print("Now showing and saving image")
+    new_image.save(splitext(basename(imagePath))[0]+"-mosaic.jpeg")
+    # new_image.show()
 
 if __name__ == "__main__":
     main()
