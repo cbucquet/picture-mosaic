@@ -3,39 +3,16 @@ import sys
 from os import listdir
 from os.path import isfile, join, splitext, basename
 import time
+from make_templates import collectTemplateFileName, transformTemplate
 
 # CONSTANTS
 PIXELATED_SIZE = 300 # number of pixels in conterted image (lowest of height/width)
 TEMPLATE_SIDE = 20
 VALID_IMAGE_EXTENSIONS = [".jpeg", ".jpg", ".png"]
 BLACK_AND_WHITE = True
-
-def collectTemplateFileName(folderPath):
-    names = []
-    for name in listdir(folderPath):
-        if isfile(join(folderPath, name)) and splitext(name)[1] in VALID_IMAGE_EXTENSIONS:
-            names.append(join(folderPath, name))
-    return names
-
-def transformTemplate(imagePath):
-    img = Image.open(imagePath)
-    img = ImageOps.exif_transpose(img)
-    img = img.convert('L') if BLACK_AND_WHITE else img.convert('RGB')
-    width, height = img.size
-
-    # Find cropped square image boundaries (centered in image)
-    square_side = min(width, height)
-    offset = abs(width - height) // 2
-    left = offset if width > height else 0
-    top = 0 if width > height else offset
-    right = square_side + left 
-    bottom = square_side + top
-
-    # Crop image
-    imgCrop = img.crop((left, top, right, bottom))
-    imgFinal = imgCrop.resize((TEMPLATE_SIDE,TEMPLATE_SIDE), resample=Image.Resampling.BILINEAR)
-    return imgFinal
-
+IMAGES_FOLDER_PATH = "/Users/Charles/Downloads/images"
+TEMPLATES_FOLDER_PATH = "/Users/Charles/Downloads/templates"
+IMPORT_PREMADE_TEMPLATES = True
 
 def findMainColor(img):
     # Find main pixel color in image
@@ -93,7 +70,6 @@ def main():
         sys.exit(1)
     
     imagePath = sys.argv[1]
-    templatesPath = collectTemplateFileName("/Users/Charles/Downloads/images")
 
     print("Importing picture to mosaicfy...")
 
@@ -121,8 +97,14 @@ def main():
 
     # Generate templates
     templates = []
-    for path in templatesPath:
-        templates.append(transformTemplate(path))
+    if IMPORT_PREMADE_TEMPLATES:
+        templatesPath = collectTemplateFileName(TEMPLATES_FOLDER_PATH)
+        for path in templatesPath:
+            templates.append(Image.open(path).convert('L') if BLACK_AND_WHITE else Image.open(path).convert('RGB'))
+    else:
+        templatesPath = collectTemplateFileName(IMAGES_FOLDER_PATH)
+        for path in templatesPath:
+            templates.append(transformTemplate(path))
 
     print("Imported all templates!")
 

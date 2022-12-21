@@ -1,2 +1,7 @@
 .DS_STORE
 images
+*.jpeg
+*.jpg
+*.png
+!test-image.jpeg
+__pycache__
