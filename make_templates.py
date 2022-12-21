@@ -2,7 +2,6 @@ from PIL import Image, ImageOps
 import sys
 from os import listdir
 from os.path import isfile, join, splitext, basename
-import time
 
 VALID_IMAGE_EXTENSIONS = [".jpeg", ".jpg", ".png"]
 BLACK_AND_WHITE = True
@@ -44,9 +43,11 @@ def main():
     inputPath = sys.argv[1]
     outputPath = sys.argv[2]
 
+    print("Generating templates from images...")
     templatesPath = collectTemplateFileName(inputPath)
     for path in templatesPath:
         transformTemplate(path).save(join(outputPath, splitext(basename(path))[0]+".jpeg"))
+    print("Done!")
 
 
 if __name__ == "__main__":

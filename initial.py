@@ -1,8 +1,6 @@
 from PIL import Image, ImageOps
 import sys
-from os import listdir
-from os.path import isfile, join, splitext, basename
-import time
+from os.path import splitext
 from make_templates import collectTemplateFileName, transformTemplate
 
 # CONSTANTS
@@ -13,30 +11,32 @@ BLACK_AND_WHITE = True
 IMAGES_FOLDER_PATH = "/Users/Charles/Downloads/images"
 TEMPLATES_FOLDER_PATH = "/Users/Charles/Downloads/templates"
 IMPORT_PREMADE_TEMPLATES = True
+MAIN_COLOR_SCALE = True
+
 
 def findMainColor(img):
     # Find main pixel color in image
-    # run_r, run_g, run_b = 0,0,0
-    # pixel_count = 0
+    if MAIN_COLOR_SCALE:
+        imgScale = img.resize((1,1), resample=Image.Resampling.BILINEAR)
+        return imgScale.getpixel((0,0))
+    else:
+        run_r, run_g, run_b = 0,0,0
+        pixel_count = 0
 
-    # height, width = img.size
-    # for i in range(height):
-    #     for j in range(width):
-    #         r, g, b = img.getpixel((i, j))
-    #         run_r += r
-    #         run_g += g
-    #         run_b += b
-    #         pixel_count += 1
+        height, width = img.size
+        for i in range(height):
+            for j in range(width):
+                r, g, b = img.getpixel((i, j))
+                run_r += r
+                run_g += g
+                run_b += b
+                pixel_count += 1
 
-    # avg_r = run_r // pixel_count
-    # avg_g = run_g // pixel_count
-    # avg_b = run_b // pixel_count
+        avg_r = run_r // pixel_count
+        avg_g = run_g // pixel_count
+        avg_b = run_b // pixel_count
 
-    # return avg_r, avg_g, avg_b
-
-
-    imgScale = img.resize((1,1), resample=Image.Resampling.BILINEAR)
-    return imgScale.getpixel((0,0))
+        return avg_r, avg_g, avg_b
 
 
 def findClosestValue(pixel, values):
@@ -72,7 +72,6 @@ def main():
     imagePath = sys.argv[1]
 
     print("Importing picture to mosaicfy...")
-
     # Open image in pillow
     img = Image.open(imagePath)
     img = ImageOps.exif_transpose(img)
@@ -94,7 +93,6 @@ def main():
 
     print("Done!")
     print("Making templates from pictures...")
-
     # Generate templates
     templates = []
     if IMPORT_PREMADE_TEMPLATES:
@@ -106,8 +104,6 @@ def main():
         for path in templatesPath:
             templates.append(transformTemplate(path))
 
-    print("Imported all templates!")
-
     # Get average pixel value for each template
     averages = []
     for template in templates:
@@ -115,7 +111,6 @@ def main():
 
     print("Done!")
     print("Making final pictures from templates...")
-
     # Collate final image based on closest pixel value
     FINAL_IMAGE_WIDTH = IMAGE_WIDTH * TEMPLATE_SIDE
     FINAL_IMAGE_HEIGHT = IMAGE_HEIGHT * TEMPLATE_SIDE
@@ -128,7 +123,7 @@ def main():
 
     print("Done!")
     print("Now showing and saving image")
-    new_image.save(splitext(basename(imagePath))[0]+"-mosaic.jpeg")
+    new_image.save(splitext(imagePath)[0]+"-mosaic.jpeg")
     # new_image.show()
 
 if __name__ == "__main__":
