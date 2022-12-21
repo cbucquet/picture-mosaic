@@ -5,3 +5,4 @@ images
 *.png
 !test-image.jpeg
 __pycache__
+test

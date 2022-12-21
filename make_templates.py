@@ -2,10 +2,7 @@ from PIL import Image, ImageOps
 import sys
 from os import listdir
 from os.path import isfile, join, splitext, basename
-
-VALID_IMAGE_EXTENSIONS = [".jpeg", ".jpg", ".png"]
-BLACK_AND_WHITE = True
-TEMPLATE_SIDE = 20
+from utilities import *
 
 def collectTemplateFileName(folderPath):
     names = []
