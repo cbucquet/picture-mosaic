@@ -2,6 +2,7 @@ from PIL import Image, ImageOps
 import sys
 from os.path import splitext
 from make_templates import collectTemplateFileName, transformTemplate
+import argparse
 
 # CONSTANTS
 PIXELATED_SIZE = 300 # number of pixels in conterted image (lowest of height/width)
