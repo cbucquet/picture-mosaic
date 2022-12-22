@@ -1,8 +1,8 @@
 from PIL import Image, ImageOps
 
 # CONSTANTS
-PIXELATED_SIZE = 300 # number of pixels in conterted image (lowest of height/width)
-TEMPLATE_SIDE = 20
+PIXELATED_SIZE = 600 # number of pixels in conterted image (lowest of height/width)
+TEMPLATE_SIDE = 40
 VALID_IMAGE_EXTENSIONS = [".jpeg", ".jpg", ".png"]
 BLACK_AND_WHITE = True
 IMAGES_FOLDER_PATH = "/Users/Charles/Downloads/images"

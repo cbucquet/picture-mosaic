@@ -22,23 +22,26 @@ def main():
         averages.append(findMainColor(template))
 
     if BLACK_AND_WHITE:
-        averages.sort()
-        ideal = []
+        bins = [5*i for i in range(255//5)]
 
-        for i in range(len(averages)):
-            ideal.append(255/len(averages) * i)
-        
         # Make plot
-        plt.plot(averages, label = "actual template color distribution")
-        plt.plot(ideal, label = "ideal distribution")
-        plt.xlabel('template #')
-        plt.ylabel('grayscale value')
-        plt.title('Template distribution')
-        plt.legend()
+        plt.hist(averages, bins, histtype='bar')
+        plt.xlabel('pixel value')
+        plt.ylabel('count')
+        plt.title('Templates distribution')
         plt.show()
 
     else:
-        print("Currently not supported for color images")
+        r = [x[0] for x in averages]
+        g = [x[1] for x in averages]
+        b = [x[2] for x in averages]
+
+        # Make 3D plot
+        fig = plt.figure()
+        ax = plt.axes(projection='3d')
+        ax.scatter3D(r, g, b)
+        ax.set(xlim=(0, 255), ylim=(0, 255), zlim=(0, 255))
+        plt.show()
 
 
 

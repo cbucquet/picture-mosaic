@@ -44,7 +44,7 @@ def main():
     templatesPath = collectTemplateFileName(inputPath)
     for path in templatesPath:
         transformTemplate(path).save(join(outputPath, splitext(basename(path))[0]+".jpeg"))
-    print("Done!")
+    print("Done! Succesfully made", len(templatesPath), "templates")
 
 
 if __name__ == "__main__":
