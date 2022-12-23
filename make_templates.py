@@ -34,7 +34,7 @@ def transformTemplate(imagePath):
 
 def main():
     if(len(sys.argv) != 3):
-        print("Error: Incorrect number of arguments. Usage: python make-templates.py <input folder path> <output folder path>")
+        print("Error: Incorrect number of arguments. Usage: python make_templates.py <input folder path> <output folder path>")
         sys.exit(1)
 
     inputPath = sys.argv[1]
@@ -42,8 +42,49 @@ def main():
 
     print("Generating templates from images...")
     templatesPath = collectTemplateFileName(inputPath)
-    for path in templatesPath:
-        transformTemplate(path).save(join(outputPath, splitext(basename(path))[0]+".jpeg"))
+
+
+    templates = []
+    averages = []
+    for i in range(len(templatesPath)):
+        temp = transformTemplate(templatesPath[i])
+        if TRANSFORM_TEMPLATES:
+            templates.append(temp)
+            averages.append(findMainColor(temp))
+        else:
+            temp.save(join(outputPath, splitext(basename(templatesPath[i]))[0]+".jpeg"))
+
+
+    # change image colors 
+    if TRANSFORM_TEMPLATES:
+        # Inefficient prob
+        all = zip(averages, templatesPath, templates)
+        all = sorted(all)
+        newAverages = []
+        newPaths = []
+        newTemplates = []
+
+        for average, path, template in all:
+            newAverages.append(average)
+            newPaths.append(path)
+            newTemplates.append(template)
+
+
+        darkenLimit = len(newAverages)//4
+        lightenLimit = len(newAverages) - len(newAverages)//4
+
+        for i in range(len(templatesPath)):
+            temp = newTemplates[i]
+            if i < darkenLimit:
+                temp = grayChangeTemplate(newTemplates[i], lighten=False)
+            elif i > lightenLimit:
+                temp = grayChangeTemplate(newTemplates[i], lighten=True)
+
+            temp.save(join(outputPath, splitext(basename(templatesPath[i]))[0]+".jpeg"))
+
+
+
+
     print("Done! Succesfully made", len(templatesPath), "templates")
 
 
