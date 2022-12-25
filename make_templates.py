@@ -22,7 +22,7 @@ def transformTemplate(imagePath):
     offset = abs(width - height) // 2
     left = offset if width > height else 0
     top = 0 if width > height else offset
-    right = square_side + left 
+    right = square_side + left
     bottom = square_side + top
 
     # Crop image
@@ -70,13 +70,19 @@ def main():
             newTemplates.append(template)
 
 
-        darkenLimit = len(newAverages)//4
-        lightenLimit = len(newAverages) - len(newAverages)//4
+        superDarkenLimit = len(newAverages)//6
+        darkenLimit = len(newAverages)//3
+        superLightenLimit = len(newAverages) - len(newAverages)//6
+        lightenLimit = len(newAverages) - len(newAverages)//3
 
         for i in range(len(templatesPath)):
             temp = newTemplates[i]
-            if i < darkenLimit:
+            if i < superDarkenLimit:
+                temp = grayChangeTemplate(newTemplates[i], lighten=False, addedOffset=10)
+            elif i < darkenLimit:
                 temp = grayChangeTemplate(newTemplates[i], lighten=False)
+            elif i > superLightenLimit:
+                temp = grayChangeTemplate(newTemplates[i], lighten=True, addedOffset=10)
             elif i > lightenLimit:
                 temp = grayChangeTemplate(newTemplates[i], lighten=True)
 

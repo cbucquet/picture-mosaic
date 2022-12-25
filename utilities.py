@@ -1,8 +1,8 @@
 from PIL import Image, ImageOps
 
 # CONSTANTS
-PIXELATED_SIZE = 400 # number of pixels in conterted image (lowest of height/width)
-TEMPLATE_SIDE = 20
+PIXELATED_SIZE = 500 # number of pixels in conterted image (lowest of height/width)
+TEMPLATE_SIDE = 40
 VALID_IMAGE_EXTENSIONS = [".jpeg", ".jpg", ".png"]
 BLACK_AND_WHITE = True
 IMAGES_FOLDER_PATH = "/Users/Charles/Downloads/images"
@@ -44,7 +44,7 @@ def findMainColor(img):
 
 
 
-def grayChangeTemplate(img, lighten=True):
+def grayChangeTemplate(img, lighten=True, addedOffset=0):
     minVal = 255
     maxVal = 0
 
@@ -56,7 +56,7 @@ def grayChangeTemplate(img, lighten=True):
             minVal = min(minVal, val)
             maxVal = max(maxVal, val)
   
-    offset = (255 - maxVal)//1 if lighten else -minVal//1
+    offset = (255 - maxVal)//1 + addedOffset if lighten else -minVal//1 - addedOffset
 
     # update pixels with offset
     for i in range(width):
