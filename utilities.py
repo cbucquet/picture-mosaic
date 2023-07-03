@@ -1,7 +1,7 @@
 from PIL import Image, ImageOps
 
 # CONSTANTS
-PIXELATED_SIZE = 500 # number of pixels in conterted image (lowest of height/width)
+PIXELATED_SIZE = 340 # number of pixels in conterted image (lowest of height/width)
 TEMPLATE_SIDE = 40
 VALID_IMAGE_EXTENSIONS = [".jpeg", ".jpg", ".png"]
 BLACK_AND_WHITE = True

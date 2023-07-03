@@ -7,7 +7,7 @@ from utilities import *
 def collectTemplateFileName(folderPath):
     names = []
     for name in listdir(folderPath):
-        if isfile(join(folderPath, name)) and splitext(name)[1] in VALID_IMAGE_EXTENSIONS:
+        if isfile(join(folderPath, name)) and splitext(name)[1].lower() in VALID_IMAGE_EXTENSIONS:
             names.append(join(folderPath, name))
     return names
 
@@ -72,7 +72,7 @@ def main():
 
         superDarkenLimit = len(newAverages)//6
         darkenLimit = len(newAverages)//3
-        superLightenLimit = len(newAverages) - len(newAverages)//6
+        superLightenLimit = len(newAverages) - len(newAverages)//5
         lightenLimit = len(newAverages) - len(newAverages)//3
 
         for i in range(len(templatesPath)):
